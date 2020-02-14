@@ -4,16 +4,18 @@ import psycopg2
 
 
 class PgHandler(object):
+    '''
+    make sure your postgre server is available
+    Attributes:
+        db: Database
+        user: Username
+        password: Password
+        host: Server
+        port: Port
+    '''
+
     def __init__(self, db="postgres", user="postgres",
-                 password=None, host="127.0.0.1", port="5432"):
-        '''
-        Args:
-            db: Database
-            user: Username
-            password: Password
-            host: Server
-            port: Port
-        '''
+                 password=None, host="127.0.0.1", port=5432):
         self.db = db
         self.user = user
         self.password = password
@@ -23,20 +25,23 @@ class PgHandler(object):
                         user = {self.user} \
                         password = {self.password} \
                         host = {self.host} \
-                        port = {self.port}'
+                        port = {self.port} '
+
+    def __connect(self):
+        return psycopg2.connect(self.config)
 
     def query(self, sql):
         '''query sql'''
         try:
-            conn = psycopg2.connect(self.config)
+            conn = self.__connect()
             cur = conn.cursor()
             cur.execute(sql)
-            res = cur.fetchall()
+            result = cur.fetchall()
             cur.close()
             conn.close()
-            if not res:
-                res = []
-            return res
+            if not result:
+                result = []
+            return result
         except psycopg2.Error as e:
             print(str(traceback.format_exc()))
             return
@@ -45,16 +50,16 @@ class PgHandler(object):
         '''execute sql'''
 
         try:
-            conn = psycopg2.connect(self.config)
+            conn = self.__connect()
             cur = conn.cursor()
             cur.execute(sql)
-            res = None
+            result = None
             if "returning" in sql:
-                res = cur.fetchone()
+                result = cur.fetchone()
             conn.commit()
             cur.close()
             conn.close()
-            return res
+            return result
         except psycopg2.Error as e:
             print(str(traceback.format_exc()))
 
@@ -66,12 +71,13 @@ class PgHandler(object):
         Raises:
             psycopg2.errors.DuplicateDatabase: database "{db_name}" already exists
         '''
-        conn = psycopg2.connect(self.config)
+        conn = self.__connect()
         conn.autocommit = True
 
         cur = conn.cursor()
-        cur.execute(f'CREATE DATABASE {db_name};')
+        result = cur.execute(f'CREATE DATABASE {db_name};')
         cur.close()
+        return result
 
     def drop_database(self, db_name):
         '''
@@ -85,7 +91,7 @@ class PgHandler(object):
         assert db_name != 'postgres', \
             '''drop database 'postgres' is not available'''
 
-        conn = psycopg2.connect(self.config)
+        conn = self.__connect()
         conn.autocommit = True
 
         cur = conn.cursor()
@@ -94,5 +100,5 @@ class PgHandler(object):
 
 
 if __name__ == "__main__":
-    pg = PgHandler("postgres", "postgres", "0000")
-    pg.drop_database('hah')
+    pg = PgHandler("moviesite", "postgres", "0000")
+    print(pg.query("select * from comments_comment"))
