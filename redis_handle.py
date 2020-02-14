@@ -46,8 +46,25 @@ class RedisHandler(object):
         conn.close()
         return result
 
+    def getrange(self, key, start, end=-1) -> list:
+        '''
+        getrange method in redis
+        Args:
+            key: key in redis set
+            start: the start index of the set
+            end: the end index of the set
+        Returns:
+            result: a list contains all the items in the set
+        '''
+        conn = self.__connect()
+        range_ = str(conn.getrange(key, start, end), encoding='utf-8')
+        print(range_)
+        result = [item for item in range_ if item != ' ']
+        return result
+
 
 if __name__ == "__main__":
     rd_handler = RedisHandler()
-    rd_handler.set_("name", "bc")
-    print(rd_handler.del_("name"))
+    rd_handler.set_("name", "I am z bc")
+    rd_handler.getrange("name", 0, 2)
+    # print(rd_handler.del_("name"))
