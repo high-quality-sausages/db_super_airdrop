@@ -27,20 +27,20 @@ class RedisHandler(object):
                            db=self.db, password=self.password)
 
     def set_(self, key, value):
-        '''set method in redis'''
+        '''SET key value'''
         conn = self.__connect()
         conn.set(key, value)
         conn.close()
 
     def get_(self, key):
-        '''get method in redis'''
+        '''GET key'''
         conn = self.__connect()
-        result = conn.get(key)
+        result = str(conn.get(key), encoding='utf-8')
         conn.close()
         return result
 
     def del_(self, key):
-        '''del method in redis'''
+        '''del key'''
         conn = self.__connect()
         result = conn.delete(key)
         conn.close()
@@ -48,7 +48,7 @@ class RedisHandler(object):
 
     def getrange(self, key, start, end=-1) -> list:
         '''
-        getrange method in redis
+        GETRANGE key start end
         Args:
             key: key in redis set
             start: the start index of the set
@@ -62,9 +62,33 @@ class RedisHandler(object):
         result = [item for item in range_ if item != ' ']
         return result
 
+    def hset(self, key, *args):
+        '''
+        HSET key field value
+        Args:
+            key: key of the hset
+            *args: (field1, value1,..., fieldn, valuen)
+        '''
+        conn = self.__connect()
+        args_dict = {}
+        for i in range(0, len(args) - 1, 2):
+            args_dict[args[i]] = args[i + 1]
+        for k, v in args_dict.items():
+            conn.hset(key, k, v)
+        conn.close()
+        return
+
+    def hget(self, key, field):
+        '''HGET key field'''
+        conn = self.__connect()
+        result = str(conn.hget(key, field), encoding='utf-8')
+        conn.close()
+        return result
+
 
 if __name__ == "__main__":
     rd_handler = RedisHandler()
-    rd_handler.set_("name", "I am z bc")
-    rd_handler.getrange("name", 0, 2)
+    # rd_handler.set_("name", "I am z bc")
+    # rd_handler.getrange("name", 0, -1)
+    rd_handler.hset("myhash", "field1", 100, "field2", 2)
     # print(rd_handler.del_("name"))
