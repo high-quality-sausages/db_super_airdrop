@@ -16,7 +16,7 @@ clone后的目录结构应如下：
     ├── .gitignore(hidden)
     └── requirements.txt
 ```
-完成上述步骤后即可对XXHandler进行引用，在使用前请确保本地db服务已正常运行<br/>
+完成上述步骤后即可对XXHandler进行引用，在使用前请确保db server已正常运行<br/>
 执行以下代码将在PostgreSQL中新建名为'test_db'的数据库：
 ``` 
 from db_super_airdrop.pg_handle import PgHandler
